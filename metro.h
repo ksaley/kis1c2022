@@ -21,6 +21,7 @@ struct station {
     bool operator!=(const station &other) const {
         return !(*this == other);
     }
+
     operator int() {
         return id;
     }
@@ -31,12 +32,16 @@ struct edge {
     int m_time;
     int m_frequency;
     int sum_line1, sum_line2;
+
     edge() = default;
 
     edge(const station &from, const station &to, int time, int frequency) : m_from(from), m_to(to), m_time(time),
                                                                             m_frequency(frequency) {}
-    edge(const station &from, const station &to, int time, int frequency, int line) : m_from(from), m_to(to), m_time(time),
-                                                                            m_frequency(frequency),sum_line1(line) {}
+
+    edge(const station &from, const station &to, int time, int frequency, int line) : m_from(from), m_to(to),
+                                                                                      m_time(time),
+                                                                                      m_frequency(frequency),
+                                                                                      sum_line1(line) {}
 };
 
 class Metro {
@@ -45,11 +50,14 @@ class Metro {
     const int MAX_TIME = 10'000;
 public:
     using path = std::pair<long long, std::vector<station>>;
+
     Metro(std::vector<station> stations, const std::vector<edge> &edges) : m_stations(std::move(stations)) {
         m_edges.resize(m_stations.size() + 1);
         for (const auto &item : edges) {
-            m_edges[item.m_from.id].emplace_back(edge(item.m_from, item.m_to, item.m_time, item.m_frequency, item.sum_line1));
-            m_edges[item.m_to.id].emplace_back(edge(item.m_to, item.m_from, item.m_time, item.m_frequency, item.sum_line2));
+            m_edges[item.m_from.id].emplace_back(
+                    edge(item.m_from, item.m_to, item.m_time, item.m_frequency, item.sum_line1));
+            m_edges[item.m_to.id].emplace_back(
+                    edge(item.m_to, item.m_from, item.m_time, item.m_frequency, item.sum_line2));
         }
     }
 
@@ -71,6 +79,7 @@ public:
     std::vector<station> build_reading_path() {
         //to do
     }
+
 private:
     path dijkstra(const station &start, const station &finish, int entry_time) {
         std::vector<long long> dist(m_edges.size(), MAX_TIME);
@@ -87,9 +96,8 @@ private:
             for (auto &edge : m_edges[front.second]) {
                 int time_delay_t = 0;
                 if (time_delay[edge.m_from.id] < edge.sum_line1) {
-                    time_delay_t += edge.sum_line1 -  time_delay[edge.m_from.id];
-                }
-                else {
+                    time_delay_t += edge.sum_line1 - time_delay[edge.m_from.id];
+                } else {
                     time_delay_t = edge.m_frequency ?
                                    (edge.m_frequency - (time_delay[edge.m_from.id] % edge.m_frequency)) %
                                    edge.m_frequency
